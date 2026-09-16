@@ -7,7 +7,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Framefinder</title>
-  <meta name="description" content="Live composition guides for a better shot." />
+  <meta name="description" content="Private, on-device scene coaching for a better shot." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -37,12 +37,12 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-3.2l-1.5-2h-6.6L7.2 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><circle cx="12" cy="13" r="4"/></svg>
         </div>
         <h1>Compose before<br>you capture.</h1>
-        <p>Live guides help you place the subject, find balance, and make stronger photos.</p>
+        <p>It reads light, balance, detail, and geometry on-device, then gives one useful nudge at a time.</p>
         <button id="start" class="primary" type="button">Open camera</button>
         <button id="tryDemo" class="text-btn" type="button">Try without camera</button>
         <button id="uploadTrigger" class="text-btn upload-link" type="button">or use a photo</button>
         <input id="upload" type="file" accept="image/*" hidden />
-        <p class="privacy">Your camera stays on this device. Nothing is uploaded.</p>
+        <p class="privacy">Scene analysis stays on this device. Nothing is uploaded.</p>
       </div>
 
       <div id="permissionHelp" class="permission-help" hidden>
@@ -50,6 +50,13 @@
         <p>Allow camera access in your browser settings, then try again. You can still use a photo now.</p>
         <div><button id="retry" class="small-btn" type="button">Try again</button><button id="usePhoto" class="small-btn ghost" type="button">Use a photo</button></div>
       </div>
+
+      <section id="coach" class="coach" hidden aria-live="polite">
+        <div class="coach-head"><span class="ai-dot"></span><span id="coachMode">Reading the scene</span><button id="coachToggle" type="button" aria-pressed="true">Auto</button></div>
+        <strong id="coachNudge">Hold still while I read the frame</strong>
+        <div class="coach-meter"><i id="coachScore"></i></div>
+        <div class="coach-signals"><span id="lightSignal">Light --</span><span id="levelSignal">Level --</span><span id="balanceSignal">Balance --</span></div>
+      </section>
 
       <div id="guideTitle" class="guide-title" hidden>
         <span id="guideName">Rule of thirds</span>
@@ -85,6 +92,7 @@
     <div><button id="closeAbout" class="icon-btn close-about" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button><span class="eyebrow">COMPOSITION, MADE VISIBLE</span><h2>A frame is a decision.</h2><p>Choose a guide, move until the scene clicks, then capture. The guide is saved with your photo so you can study what worked.</p><p class="quiet">Based on classic composition ideas. Built with original code. No images leave your device.</p></div>
   </dialog>
 
+  <script src="scene-coach.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
