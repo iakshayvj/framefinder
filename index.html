@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+  <meta name="theme-color" content="#09090a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Framefinder</title>
+  <meta name="description" content="Private, on-device scene coaching for a better shot." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app" id="app">
+    <section class="stage" id="stage" aria-label="Camera preview">
+      <video id="camera" autoplay playsinline muted></video>
+      <img id="uploaded" alt="Your uploaded preview" hidden />
+      <canvas id="demo" hidden></canvas>
+      <canvas id="guides" aria-hidden="true"></canvas>
+      <div class="shade" aria-hidden="true"></div>
+
+      <header class="topbar">
+        <div class="brand"><span class="mark"></span> Framefinder</div>
+        <div class="top-actions">
+          <button id="torchBtn" class="icon-btn" type="button" aria-label="Toggle torch" title="Torch" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4.5 13.5H11L9.8 22 19 10h-6.5L13 2Z"/></svg>
+          </button>
+          <button id="flip" class="icon-btn" type="button" aria-label="Switch camera" title="Switch camera">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-3.2l-1.5-2h-6.6L7.2 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><path d="M15.5 11.4a4.2 4.2 0 0 0-7.1 1.4M8.5 16.6a4.2 4.2 0 0 0 7.1-1.4"/><path d="m8.4 10 .1 2.8 2.7-.5M15.6 18l-.1-2.8-2.7.5"/></svg>
+          </button>
+          <button id="proToggle" class="icon-btn" type="button" aria-label="Camera controls" title="Camera controls" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h9M19 8h1M4 16h1M11 16h9"/><circle cx="16" cy="8" r="2.4"/><circle cx="8" cy="16" r="2.4"/></svg>
+          </button>
+          <button id="info" class="icon-btn" type="button" aria-label="About composition guides" title="About">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div id="welcome" class="welcome">
+        <div class="welcome-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7h-3.2l-1.5-2h-6.6L7.2 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2Z"/><circle cx="12" cy="13" r="4"/></svg>
+        </div>
+        <h1>Compose before<br>you capture.</h1>
+        <p>It reads light, balance, detail, and geometry on-device, then gives one useful nudge at a time.</p>
+        <button id="start" class="primary" type="button">Open camera</button>
+        <button id="tryDemo" class="text-btn" type="button">Try without camera</button>
+        <button id="uploadTrigger" class="text-btn upload-link" type="button">or use a photo</button>
+        <input id="upload" type="file" accept="image/*" hidden />
+        <p class="privacy">Scene analysis stays on this device. Nothing is uploaded.</p>
+      </div>
+
+      <div id="permissionHelp" class="permission-help" hidden>
+        <strong>Camera is blocked</strong>
+        <p>Allow camera access in your browser settings, then try again. You can still use a photo now.</p>
+        <div><button id="retry" class="small-btn" type="button">Try again</button><button id="usePhoto" class="small-btn ghost" type="button">Use a photo</button></div>
+      </div>
+
+      <section id="coach" class="coach" hidden aria-live="polite">
+        <div class="coach-head"><span class="ai-dot"></span><span id="coachMode">Reading the scene</span><button id="coachToggle" type="button" aria-pressed="true">Auto</button></div>
+        <strong id="coachNudge">Hold still while I read the frame</strong>
+        <div class="coach-meter"><i id="coachScore"></i></div>
+        <div class="coach-signals"><span id="lightSignal">Light --</span><span id="levelSignal">Level --</span><span id="balanceSignal">Balance --</span></div>
+      </section>
+
+      <div id="guideTitle" class="guide-title" hidden>
+        <span id="guideName">Rule of thirds</span>
+        <small id="guideHint">Place your subject on an intersection</small>
+      </div>
+
+      <section id="proSheet" class="pro-sheet" hidden aria-label="Camera controls">
+        <div class="pro-head"><strong>Camera controls</strong><button id="proClose" class="icon-btn" type="button" aria-label="Close camera controls"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+        <div id="proRows"></div>
+        <p class="pro-note" id="proNote"></p>
+      </section>
+      <div id="focusRing" class="focus-ring" hidden aria-hidden="true"></div>
+      <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+      <section id="controls" class="controls" hidden>
+        <div class="rail-wrap">
+          <div id="rail" class="rail" role="listbox" aria-label="Composition guide"></div>
+        </div>
+        <div class="capture-row">
+          <button id="clear" class="side-control" type="button" aria-label="Close preview">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+          </button>
+          <button id="shutter" class="shutter" type="button" aria-label="Capture photo"><span></span></button>
+          <button id="hideGuides" class="side-control active" type="button" aria-label="Hide composition guide">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+          </button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="resultDialog" class="result-dialog">
+    <div class="result-shell">
+      <div class="result-head"><strong>Your frame</strong><button id="closeResult" class="icon-btn" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+      <img id="result" alt="Captured photo with composition guide" />
+      <div class="result-actions"><button id="retake" class="small-btn ghost">Retake</button><button id="save" class="small-btn">Save photo</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="aboutDialog" class="about-dialog">
+    <div><button id="closeAbout" class="icon-btn close-about" aria-label="Close"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button><span class="eyebrow">COMPOSITION, MADE VISIBLE</span><h2>A frame is a decision.</h2><p>Choose a guide, move until the scene clicks, then capture. The guide is saved with your photo so you can study what worked.</p><p class="quiet">Based on classic composition ideas. Built with original code. No images leave your device.</p></div>
+  </dialog>
+
+  <script src="scene-coach.js"></script>
+  <script src="pro-controls.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
